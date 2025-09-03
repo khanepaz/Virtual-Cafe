@@ -9,115 +9,797 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
     <link rel="shortcut icon" href="assets/img/clipart1000346.ico" type="image/x-icon">
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Vazirmatn', sans-serif;
-            background-color: #382c24;
+            background: linear-gradient(135deg, #2c1810 0%, #4a3426 50%, #5d4037 100%);
             color: #f5f5f5;
-        }
-
-        .main-container {
-            background-color: #4e3a31;
-            border-radius: 1.5rem;
-            padding: 2rem;
-            margin: 2rem auto;
-            max-width: 1200px;
-        }
-
-        .progress {
-            background-color: #5a4a42;
-            height: 10px;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            background: linear-gradient(90deg, #c19a6b, #e0d8d3);
-            border-radius: 5px !important;
-            transition: width 0.4s ease;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        }
-
-        .button-group .btn {
-            background-color: #6d574c;
-            color: #e0d8d3;
-            border: none;
-            transition: background-color 0.3s, color 0.3s;
-            margin: 0.2rem;
-        }
-
-        .button-group .btn:hover,
-        .button-group .btn.active {
-            background-color: #e0d8d3;
-            color: #382c24;
-        }
-
-        .nameofcoffee {
-            align-items: end !important;
-        }
-
-        .ingredient-item {
-            background-color: rgba(75, 85, 99, 0.3);
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .coffee-image-container {
+            min-height: 100vh;
             position: relative;
-            width: 256px;
-            height: 256px;
-            margin: 0 auto;
+            overflow-x: hidden;
         }
-
-        .coffee-image {
+        /* پارتیکل سیستم */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            object-fit: contain;
-            border-radius: 1.5rem;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
         }
-
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, rgba(139, 69, 19, 0.8) 0%, rgba(160, 82, 45, 0.6) 50%, transparent 100%);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        /* بخار متحرک */
+        .steam {
+            position: absolute;
+            top: 0px;
+            left: 25%;
+            transform: translateX(-50%);
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .steam.show {
+            opacity: 1;
+        }
+        .steam-particle {
+            position: absolute;
+            width: 109px;
+            height: 48px;
+            background: linear-gradient(to top, rgb(255 157 91 / 60%) 0%, rgb(237 170 82 / 30%) 50%, transparent 100%);
+            border-radius: 50%;
+            animation: steamRise 3s infinite ease-out;
+}
+        .steam-particle:nth-child(1) { left: -10px; animation-delay: 0s; }
+        .steam-particle:nth-child(2) { left: 0px; animation-delay: 0.5s; }
+        .steam-particle:nth-child(3) { left: 10px; animation-delay: 1s; }
+        @keyframes steamRise {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: translateY(-20px) scale(1.2);
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-40px) scale(0.8);
+                opacity: 0;
+            }
+        }
+        /* افکت یخ */
+        .ice-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .ice-effect.show {
+            opacity: 1;
+        }
+        .ice-effect::before, .ice-effect::after {
+            content: '';
+            position: absolute;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(200, 230, 255, 0.4) 50%, transparent 70%);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: floatIce 4s infinite ease-in-out;
+        }
+        .ice-effect::before {
+            width: 15px;
+            height: 15px;
+            bottom: 15%;
+            left: 25%;
+            animation-delay: 0s;
+        }
+        .ice-effect::after {
+            width: 10px;
+            height: 10px;
+            bottom: 20%;
+            left: 65%;
+            animation-delay: 2s;
+        }
+        @keyframes floatIce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(10deg); }
+        }
+        /* افکت ذرات پس‌زمینه */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(165, 42, 42, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(139, 69, 19, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(160, 82, 45, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .main-container {
+            background: linear-gradient(135deg, rgba(78, 58, 49, 0.95) 0%, rgba(92, 68, 57, 0.95) 100%);
+            border-radius: 2rem;
+            padding: 2.5rem;
+            margin: 2rem auto;
+            max-width: 1400px;
+            box-shadow:
+                0 20px 40px rgba(0,0,0,0.3),
+                0 0 60px rgba(139, 69, 19, 0.1),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            z-index: 1;
+        }
+        .main-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #8b4513, #a0522d, #daa520, #cd853f);
+            border-radius: 2rem;
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(8px);
+        }
+        header h1 {
+            background: linear-gradient(45deg, #daa520, #f4a460, #daa520);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+            0%, 100% { filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5)) brightness(1); }
+            50% { filter: drop-shadow(2px 2px 8px rgba(218, 165, 32, 0.4)) brightness(1.1); }
+        }
+        /* کنترل‌های جدید */
+        .controls-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .control-group {
+            margin-bottom: 1rem;
+        }
+        .control-label {
+            color: #f0e6db;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .size-buttons, .temp-buttons, .cup-colors {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .size-btn, .temp-btn, .cup-color-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(109, 87, 76, 0.8);
+            color: #f0e6db;
+            border-radius: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        .size-btn.active, .temp-btn.active, .cup-color-btn.active {
+            background: linear-gradient(135deg, #daa520 0%, #f4a460 100%);
+            color: #2c1810;
+            border-color: #f4a460;
+            transform: scale(1.05);
+        }
+        .size-btn:hover, .temp-btn:hover, .cup-color-btn:hover {
+            background: rgba(160, 82, 45, 0.9);
+            border-color: rgba(255,255,255,0.4);
+            transform: translateY(-2px);
+        }
+        /* استایل فنجان با قابلیت تغییر رنگ و سایز */
+        .coffee-cup-container {
+            width: 256px;
+            height: 320px;
+            position: relative;
+            margin: 0 auto;
+            perspective: 800px;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+            transition: all 0.3s ease;
+        }
+        .coffee-cup-container.small { transform: scale(0.8); }
+        .coffee-cup-container.large { transform: scale(1.2); }
+        .coffee-cup {
+            width: 100%;
+            height: 256px;
+            background: transparent;
+            border-radius: 0 0 60% 60% / 0 0 30% 30%;
+            position: relative;
+            overflow: hidden;
+            margin-top: 30px;
+            border: 14px solid #e8ddd4;
+            border-bottom-width: 20px;
+            border-top: none;
+            box-shadow:
+                inset 0 0 25px rgba(0,0,0,0.4),
+                inset 0 -10px 20px rgba(255,255,255,0.1),
+                0 8px 25px rgba(0,0,0,0.3),
+                0 0 0 2px rgba(255,255,255,0.1);
+            transform: rotateX(12deg);
+            transition: all 0.3s ease;
+        }
+        .coffee-cup.white { border-color: #e8ddd4; }
+        .coffee-cup.black { border-color: #2c2c2c; }
+        .coffee-cup.red { border-color: #c44536; }
+        .coffee-cup.blue { border-color: #4a90c2; }
+        .coffee-cup.green { border-color: #5d8c5d; }
+        .coffee-cup:hover {
+            transform: rotateX(8deg) scale(1.02);
+        }
+        .coffee-cup::before {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 8px;
+            right: 8px;
+            height: 15px;
+            background: linear-gradient(ellipse, #3e2a21 0%, rgba(62, 42, 33, 0.8) 50%, transparent 100%);
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .coffee-layer {
+            width: 100%;
+            position: absolute;
+            left: 0;
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .coffee-layer:last-child {
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        .handle {
+            position: absolute;
+            top: 80px;
+            right: -35px;
+            width: 55px;
+            height: 105px;
+            border: 14px solid #e8ddd4;
+            border-left: none;
+            border-radius: 0 65px 65px 0;
+            box-shadow:
+                -3px 0 8px rgba(0,0,0,0.2),
+                inset 2px 0 4px rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .handle.white { border-color: #e8ddd4; }
+        .handle.black { border-color: #2c2c2c; }
+        .handle.red { border-color: #c44536; }
+        .handle.blue { border-color: #4a90c2; }
+        .handle.green { border-color: #5d8c5d; }
+        .coffee-cup-container:hover .handle {
+            transform: translateX(2px);
+        }
+        /* اطلاعات تغذیه‌ای */
+        .nutrition-info {
+            background: rgba(255,255,255,0.05);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        .nutrition-item {
+            display: inline-block;
+            margin: 0 1rem;
+            padding: 0.5rem;
+        }
+        .nutrition-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #daa520;
+        }
+        .nutrition-label {
+            font-size: 0.8rem;
+            color: #e8ddd4;
+            opacity: 0.8;
+        }
+        /* بهبود اسلایدرها */
+        .slider-container {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 1rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .slider-container:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        .slider-thumb {
+            height: 12px;
+            background: linear-gradient(90deg, #4a4a4a 0%, #6c757d 50%, #8a8a8a 100%);
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .slider-thumb:hover {
+            background: linear-gradient(90deg, #5a5a5a 0%, #7c858d 50%, #9a9a9a 100%);
+        }
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #f0e6db 0%, #e8ddd4 50%, #ddd2c7 100%);
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow:
+                0 4px 8px rgba(0,0,0,0.3),
+                inset 0 1px 2px rgba(255,255,255,0.3);
+            transition: all 0.2s ease;
+        }
+        .slider-thumb::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow:
+                0 6px 12px rgba(0,0,0,0.4),
+                inset 0 1px 2px rgba(255,255,255,0.4);
+        }
+        .slider-thumb::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #f0e6db 0%, #e8ddd4 50%, #ddd2c7 100%);
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+            box-shadow:
+                0 4px 8px rgba(0,0,0,0.3),
+                inset 0 1px 2px rgba(255,255,255,0.3);
+        }
         .ingredient-label {
             font-size: 1.125rem;
-            color: #d1d5db;
+            color: #f0e6db;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
-
+        .value-percent {
+            background: linear-gradient(45deg, #daa520, #f4a460);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+        }
+        /* بهبود دکمه‌ها */
+        .button-group .btn {
+            background: linear-gradient(135deg, rgba(109, 87, 76, 0.8) 0%, rgba(139, 105, 88, 0.8) 100%);
+            color: #f0e6db;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin: 0.3rem;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .button-group .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .button-group .btn:hover::before {
+            left: 100%;
+        }
+        .button-group .btn:hover {
+            background: linear-gradient(135deg, rgba(160, 82, 45, 0.9) 0%, rgba(210, 140, 69, 0.9) 100%);
+            color: #fff;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(160, 82, 45, 0.3);
+            border-color: rgba(255,255,255,0.4);
+        }
+        .button-group .btn.active {
+            background: linear-gradient(135deg, #daa520 0%, #f4a460 100%);
+            color: #2c1810;
+            transform: scale(1.05);
+            box-shadow:
+                0 8px 25px rgba(218, 165, 32, 0.4),
+                inset 0 1px 2px rgba(255,255,255,0.3);
+            border-color: #f4a460;
+            font-weight: bold;
+        }
         .popular-choices h2 {
-            color: white;
+            color: #f0e6db;
             font-weight: bold;
             text-align: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
         }
-
-        .icon-label {
-            display: inline-flex;
+        .popular-choices h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #daa520, transparent);
+        }
+        /* بهبود دکمه‌های عملیات */
+        .btn-clear, .save-btn, .share-btn {
+            background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
+            color: #fff;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 1.5rem;
+            font-size: 0.95rem;
+            margin: 0.3rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(139, 69, 19, 0.3);
+            cursor: pointer;
+        }
+        .btn-clear::before, .save-btn::before, .share-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .btn-clear:hover::before, .save-btn:hover::before, .share-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        .btn-clear:hover, .save-btn:hover, .share-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(139, 69, 19, 0.4);
+        }
+        .save-btn {
+            background: linear-gradient(135deg, #5d8c5d 0%, #4a754a 100%);
+            box-shadow: 0 6px 20px rgba(93, 140, 93, 0.3);
+        }
+        .save-btn:hover {
+            box-shadow: 0 10px 30px rgba(93, 140, 93, 0.4);
+        }
+        .share-btn {
+            background: linear-gradient(135deg, #4a90c2 0%, #357abd 100%);
+            box-shadow: 0 6px 20px rgba(74, 144, 194, 0.3);
+        }
+        .share-btn:hover {
+            box-shadow: 0 10px 30px rgba(74, 144, 194, 0.4);
+        }
+        /* ذخیره شده‌ها */
+        .saved-recipes {
+            background: rgba(255,255,255,0.05);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .saved-recipe {
+            background: rgba(255,255,255,0.1);
+            border-radius: 0.8rem;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 6px;
         }
-
-        .icon-label .material-icons {
-            font-size: 1.2rem;
+        .saved-recipe:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateX(5px);
         }
-        #ingredientsList li span{
-            color: antiquewhite !important;
+        .delete-recipe {
+            color: #c44536;
+            cursor: pointer;
+            padding: 0.2rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        .delete-recipe:hover {
+            background: rgba(196, 69, 54, 0.2);
+            transform: scale(1.2);
+        }
+        .personal-name {
+            font-size: 0.95rem;
+            color: #f0e6db;
+            margin-top: 0.5rem;
+            text-align: center;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        .coffee-info {
+            font-size: 0.95rem;
+            color: #e8ddd4;
+            text-align: center;
+            margin-top: 0.5rem;
+            opacity: 0.95;
+            font-style: italic;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        /* بهبود لیست مواد */
+        .ingredient-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 1rem;
+            padding: 1rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        #ingredientsList li {
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+            color: #e8ddd4;
+        }
+        #ingredientsList li:last-child {
+            border-bottom: none;
+        }
+        /* نام قهوه بهبود یافته */
+        #coffeeName {
+            background: linear-gradient(45deg, #daa520, #f4a460, #daa520);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.6rem !important;
+            font-weight: bold;
+            text-shadow: none;
+            animation: coffee-glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes coffee-glow {
+            0% { filter: brightness(1); }
+            100% { filter: brightness(1.2) drop-shadow(0 0 10px rgba(218, 165, 32, 0.3)); }
+        }
+        /* اعلان */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #5d8c5d 0%, #4a754a 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        .notification.show {
+            transform: translateX(0);
+        }
+        /* ریسپانسیو */
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            .coffee-cup-container {
+                width: 200px;
+                height: 250px;
+            }
+            .coffee-cup {
+                height: 200px;
+            }
+            header h1 {
+                font-size: 2.5rem;
+            }
+            .size-buttons, .temp-buttons, .cup-colors {
+                justify-content: center;
+            }
+            .nutrition-item {
+                margin: 0 0.5rem;
+            }
         }
     </style>
 </head>
 <body>
+<!-- پارتیکل سیستم -->
+<div class="particles" id="particles"></div>
 <div class="container-fluid">
     <div class="main-container">
         <header class="text-center mb-5">
-            <h1 class="display-3 fw-bold text-white">کافه مجازی</h1>
+            <h1 class="display-3 fw-bold">کافه مجازی</h1>
         </header>
-
-        <div class="row align-items-center">
-            <!-- تصویر قهوه -->
-            <div class="col-lg-4 d-flex flex-column align-items-center justify-content-center">
-                <div class="coffee-image-container">
-                    <img id="coffeeImage" alt="A cartoon coffee cup" class="coffee-image" src="assets/img/Latte.png?text=Latte"/>
+        <div class="row">
+            <!-- کنترل‌های جدید -->
+            <div class="col-12">
+                <div class="controls-section">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="control-group">
+                                <label class="control-label">سایز فنجان:</label>
+                                <div class="size-buttons">
+                                    <button class="size-btn" data-size="small">کوچک</button>
+                                    <button class="size-btn active" data-size="medium">متوسط</button>
+                                    <button class="size-btn" data-size="large">بزرگ</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="control-group">
+                                <label class="control-label">دما:</label>
+                                <div class="temp-buttons">
+                                    <button class="temp-btn active" data-temp="hot">گرم 🔥</button>
+                                    <button class="temp-btn" data-temp="warm">معتدل 🌡️</button>
+                                    <button class="temp-btn" data-temp="cold">سرد ❄️</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="control-group">
+                                <label class="control-label">رنگ فنجان:</label>
+                                <div class="cup-colors">
+                                    <button class="cup-color-btn active" data-color="white" style="background-color: #e8ddd4;">سفید</button>
+                                    <button class="cup-color-btn" data-color="black" style="background-color: #2c2c2c;">سیاه</button>
+                                    <button class="cup-color-btn" data-color="red" style="background-color: #c44536;">قرمز</button>
+                                    <button class="cup-color-btn" data-color="blue" style="background-color: #4a90c2;">آبی</button>
+                                    <button class="cup-color-btn" data-color="green" style="background-color: #5d8c5d;">سبز</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="ingredient-item w-100" style="max-width: 320px;">
-                    <ul id="ingredientsList" class="list-unstyled small text-muted">
+            </div>
+        </div>
+        <div class="row align-items-center">
+            <!-- فنجان لایه‌ای -->
+            <div class="col-lg-4 d-flex flex-column align-items-center justify-content-center">
+                <div class="coffee-cup-container medium" id="coffeeContainer">
+                    <div class="coffee-cup white" id="coffeeCup">
+                        <div class="steam show" id="steam">
+                            <div class="steam-particle"></div>
+                            <div class="steam-particle"></div>
+                            <div class="steam-particle"></div>
+                        </div>
+                        <div class="ice-effect" id="iceEffect"></div>
+                    </div>
+                    <div class="handle white" id="cupHandle"></div>
+                </div>
+                <p id="coffeeName" class="mt-3">لاته</p>
+                <p id="coffeeInfo" class="coffee-info">ترکیب شیر و قهوه با کف نرم</p>
+                <!-- اطلاعات تغذیه‌ای -->
+                <div class="nutrition-info">
+                    <div class="nutrition-item">
+                        <div class="nutrition-value" id="caloriesValue">150</div>
+                        <div class="nutrition-label">کالری</div>
+                    </div>
+                    <div class="nutrition-item">
+                        <div class="nutrition-value" id="caffeineValue">85</div>
+                        <div class="nutrition-label">میلی‌گرم کافئین</div>
+                    </div>
+                    <div class="nutrition-item">
+                        <div class="nutrition-value" id="tempValue">75°C</div>
+                        <div class="nutrition-label">دما</div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 flex-wrap justify-content-center">
+                    <button id="clearCup" class="btn-clear btn-sm">سفارش شخصی</button>
+                    <button id="saveCombo" class="save-btn btn-sm">ذخیره من</button>
+                    <button id="shareCombo" class="share-btn btn-sm">اشتراک</button>
+                </div>
+                <p id="personalName" class="personal-name d-none">ترکیب شخصی شما</p>
+                <div class="saved-recipes d-none" id="savedRecipes">
+                    <h6 class="text-center mb-3" style="color: #daa520;">ترکیبات ذخیره شده</h6>
+                    <div id="savedRecipesList"></div>
+                </div>
+            </div>
+            <!-- اسلایدرها -->
+            <div class="col-lg-8">
+                <div class="row">
+                    <div class="col-md-6 slider-container">
+                        <div class="ingredient-label mb-2">
+                            <span>اسپرسو</span>
+                            <span class="value-percent">30%</span>
+                        </div>
+                        <input class="form-range slider-thumb" max="100" min="0" type="range" value="30"/>
+                    </div>
+                    <div class="col-md-6 slider-container">
+                        <div class="ingredient-label mb-2">
+                            <span>شیر بخار داده شده</span>
+                            <span class="value-percent">60%</span>
+                        </div>
+                        <input class="form-range slider-thumb" max="100" min="0" type="range" value="60"/>
+                    </div>
+                    <div class="col-md-6 slider-container">
+                        <div class="ingredient-label mb-2">
+                            <span>کف شیر</span>
+                            <span class="value-percent">10%</span>
+                        </div>
+                        <input class="form-range slider-thumb" max="100" min="0" type="range" value="10"/>
+                    </div>
+                    <div class="col-md-6 slider-container">
+                        <div class="ingredient-label mb-2">
+                            <span>آب داغ</span>
+                            <span class="value-percent">0%</span>
+                        </div>
+                        <input class="form-range slider-thumb" max="100" min="0" type="range" value="0"/>
+                    </div>
+                    <div class="col-md-6 slider-container">
+                        <div class="ingredient-label mb-2">
+                            <span>شکلات</span>
+                            <span class="value-percent">0%</span>
+                        </div>
+                        <input class="form-range slider-thumb" max="100" min="0" type="range" value="0"/>
+                    </div>
+                    <div class="col-md-6 slider-container">
+                        <div class="ingredient-label mb-2">
+                            <span>خامه زده شده</span>
+                            <span class="value-percent">0%</span>
+                        </div>
+                        <input class="form-range slider-thumb" max="100" min="0" type="range" value="0"/>
+                    </div>
+                    <div class="col-md-6 slider-container">
+                        <div class="ingredient-label mb-2">
+                            <span>بستنی</span>
+                            <span class="value-percent">0%</span>
+                        </div>
+                        <input class="form-range slider-thumb" max="100" min="0" type="range" value="0"/>
+                    </div>
+                    <div class="col-md-6 slider-container">
+                        <div class="ingredient-label mb-2">
+                            <span>سیروپ کارامل</span>
+                            <span class="value-percent">0%</span>
+                        </div>
+                        <input class="form-range slider-thumb" max="100" min="0" type="range" value="0"/>
+                    </div>
+                </div>
+                <div class="ingredient-item w-100 mt-3" style="max-width: 320px;">
+                    <ul id="ingredientsList" class="list-unstyled small">
                         <li class="d-flex justify-content-between mb-2"><span>اسپرسو</span><span>30</span></li>
                         <li class="d-flex justify-content-between mb-2"><span>شیر بخار داده شده</span><span>60</span></li>
                         <li class="d-flex justify-content-between mb-2"><span>کف شیر</span><span>10</span></li>
@@ -129,104 +811,10 @@
                     </ul>
                 </div>
             </div>
-
-            <!-- نوارهای پیشرفت -->
-            <div class="col-lg-8">
-                <div class="row">
-                    <!-- اسپرسو -->
-                    <div class="col-md-6 mb-3">
-                        <div class="d-flex justify-content-between align-items-center ingredient-label mb-2">
-                            <span class="icon-label"><span class="material-icons">coffee</span> اسپرسو</span>
-                            <span id="espresso-value">30%</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar" id="espresso-bar" style="width: 30%"></div>
-                        </div>
-                    </div>
-
-                    <!-- شیر بخار داده شده -->
-                    <div class="col-md-6 mb-3">
-                        <div class="d-flex justify-content-between align-items-center ingredient-label mb-2">
-                            <span class="icon-label"><span class="material-icons">local_drink</span> شیر بخار داده شده</span>
-                            <span id="steamedMilk-value">60%</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar" id="steamedMilk-bar" style="width: 60%"></div>
-                        </div>
-                    </div>
-
-                    <!-- کف شیر -->
-                    <div class="col-md-6 mb-3">
-                        <div class="d-flex justify-content-between align-items-center ingredient-label mb-2">
-                            <span class="icon-label"><span class="material-icons">bubble_chart</span> کف شیر</span>
-                            <span id="milkFoam-value">10%</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar" id="milkFoam-bar" style="width: 10%"></div>
-                        </div>
-                    </div>
-
-                    <!-- آب داغ -->
-                    <div class="col-md-6 mb-3">
-                        <div class="d-flex justify-content-between align-items-center ingredient-label mb-2">
-                            <span class="icon-label"><span class="material-icons">water</span> آب داغ</span>
-                            <span id="hotWater-value">0%</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar" id="hotWater-bar" style="width: 0%"></div>
-                        </div>
-                    </div>
-
-                    <!-- شکلات -->
-                    <div class="col-md-6 mb-3">
-                        <div class="d-flex justify-content-between align-items-center ingredient-label mb-2">
-                            <span class="icon-label"><span class="material-icons">cake</span> شکلات</span>
-                            <span id="chocolate-value">0%</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar" id="chocolate-bar" style="width: 0%"></div>
-                        </div>
-                    </div>
-
-                    <!-- خامه زده شده -->
-                    <div class="col-md-6 mb-3">
-                        <div class="d-flex justify-content-between align-items-center ingredient-label mb-2">
-                            <span class="icon-label"><span class="material-icons">cloud</span> خامه زده شده</span>
-                            <span id="whippedCream-value">0%</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar" id="whippedCream-bar" style="width: 0%"></div>
-                        </div>
-                    </div>
-
-                    <!-- بستنی -->
-                    <div class="col-md-6 mb-3">
-                        <div class="d-flex justify-content-between align-items-center ingredient-label mb-2">
-                            <span class="icon-label"><span class="material-icons">ac_unit</span> بستنی</span>
-                            <span id="iceCream-value">0%</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar" id="iceCream-bar" style="width: 0%"></div>
-                        </div>
-                    </div>
-
-                    <!-- سیروپ کارامل -->
-                    <div class="col-md-6 mb-3">
-                        <div class="d-flex justify-content-between align-items-center ingredient-label mb-2">
-                            <span class="icon-label"><span class="material-icons">kitchen</span> سیروپ کارامل</span>
-                            <span id="caramelSyrup-value">0%</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar" id="caramelSyrup-bar" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
-
-        <!-- انتخاب‌های محبوب -->
+        <!-- دکمه‌های محبوب -->
         <div class="popular-choices">
-            <h2 class="h2 fw-bold">انتخاب‌های محبوب کافه</h2>
+            <h2 class="h2 mt-5 fw-bold">انتخاب‌های محبوب کافه</h2>
             <div class="button-group d-flex flex-wrap justify-content-center">
                 <button class="btn btn-sm px-5 py-2 fw-semibold rounded-pill">اسپرسو</button>
                 <button class="btn btn-sm px-5 py-2 fw-semibold rounded-pill">دوبیو</button>
@@ -248,15 +836,15 @@
             </div>
         </div>
     </div>
-
-    <div class="container text-center mt-4">
+    <div class="container text-center">
         <p class="mb-4 text-light opacity-75">طراحی شده توسط حامد خانه پز - 1404</p>
     </div>
 </div>
-
+<!-- اعلان -->
+<div class="notification" id="notification"></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // ترکیبات قهوه
+    // ترکیبات معروف
     const coffeeRecipes = {
         "اسپرسو": { espresso: 100, steamedMilk: 0, milkFoam: 0, hotWater: 0, chocolate: 0, whippedCream: 0, iceCream: 0, caramelSyrup: 0 },
         "دوبیو": { espresso: 100, steamedMilk: 0, milkFoam: 0, hotWater: 0, chocolate: 0, whippedCream: 0, iceCream: 0, caramelSyrup: 0 },
@@ -276,71 +864,355 @@
         "آفوگاتو": { espresso: 50, steamedMilk: 0, milkFoam: 0, hotWater: 0, chocolate: 0, whippedCream: 0, iceCream: 50, caramelSyrup: 0 },
         "وینا": { espresso: 80, steamedMilk: 0, milkFoam: 0, hotWater: 0, chocolate: 0, whippedCream: 20, iceCream: 0, caramelSyrup: 0 },
     };
-
-    // تصاویر قهوه
-    const coffeeImages = {
-        "اسپرسو": "assets/img/Espresso.png?text=Espresso",
-        "دوبیو": "assets/img/Doppio.png?text=Doppio",
-        "ریسترتو": "assets/img/Ristreto.png?text=Ristretto",
-        "آمریکانو": "assets/img/Americano.png?text=Americano",
-        "ماکیاتو": "assets/img/micato.png?text=Macchiato",
-        "لاته ماکیاتو": "assets/img/macchato.png?text=Latte+Macchiat",
-        "کورتادو": "assets/img/Cortado.png?text=Cortado",
-        "لاته": "assets/img/Latte.png?text=Latte",
-        "فلت وایت": "assets/img/flat white.png?text=Flat+White",
-        "کاپوچینو": "assets/img/cappuccino.png?text=Cappuccino",
-        "موکا": "assets/img/Mocha.png?text=Mocha",
-        "رد آی": "assets/img/red eye.png?text=Red+Eye",
-        "بلک آی": "assets/img/black Eye.png?text=Black+Eye",
-        "گالائو": "assets/img/Galao.png?text=Galao",
-        "بیچرین": "assets/img/Bicerin.jpg?text=Bicerin",
-        "آفوگاتو": "assets/img/affogato.png?text=Affogato",
-        "وینا": "assets/img/vienna.png?text=Vienna+Coffee",
+    // توضیحات آموزشی
+    const coffeeInfoText = {
+        "اسپرسو": "یک فنجان قهوه غلیظ و قوی با حاوی 30 میلی‌لیتر قهوه",
+        "دوبیو": "دو برابر اسپرسو — دو لایه متراکم قهوه در یک فنجان",
+        "ریسترتو": "نیمه حجم اسپرسو — قهوه بسیار غلیظ و عطری",
+        "آمریکانو": "اسپرسو با آب داغ — شبیه قهوه دستگاهی ولی غنی‌تر",
+        "ماکیاتو": "اسپرسو با یک لایه کف شیر — ترکیب شیر و قهوه با تعادل",
+        "لاته ماکیاتو": "لاته با لایه اسپرسو روی آن — شیر اول، قهوه بعد",
+        "کورتادو": "اسپرسو با شیر برابر — برای عاشقان طعم ملایم",
+        "لاته": "شیر زیاد با قهوه و کف — نرم و کرمی",
+        "فلت وایت": "شیر کم‌تر از لاته — طعم قوی‌تر قهوه",
+        "کاپوچینو": "سه لایه مساوی: قهوه، شیر، کف — کلاسیک ایتالیایی",
+        "موکا": "لاته با شکلات — ترکیب شیر، قهوه و شکلات",
+        "رد آی": "آمریکانو با اسپرسو اضافه — قهوه بسیار قوی",
+        "بلک آی": "دو اسپرسو در آمریکانو — قهوه اولترا قوی",
+        "گالائو": "شیر بخار داده شده با اسپرسو — ملایم و بزرگ",
+        "بیچرین": "سه لایه: شیر، قهوه، کف — قهوه سه‌لایه ایتالیایی",
+        "آفوگاتو": "بستنی و اسپرسو — دسر قهوه‌ای با طعم غنی",
+        "وینا": "اسپرسو با خامه — شیرین و لوکس، مانند دسر"
     };
-
-    // عناصر DOM
+    // تنظیمات مواد با رنگ‌های بهبود یافته و اطلاعات کالری
+    const ingredientsConfig = [
+        { name: "اسپرسو", key: "espresso", color: "#2c1b0c", label: "قهوه", calories: 2, caffeine: 63 },
+        { name: "شیر بخار داده شده", key: "steamedMilk", color: "#f5f1eb", label: "شیر", calories: 150, caffeine: 0 },
+        { name: "کف شیر", key: "milkFoam", color: "#fefcf8", label: "کف", calories: 20, caffeine: 0 },
+        { name: "آب داغ", key: "hotWater", color: "#b8e6ff", label: "آب", calories: 0, caffeine: 0 },
+        { name: "شکلات", key: "chocolate", color: "#4a2c17", label: "شکلات", calories: 50, caffeine: 5 },
+        { name: "خامه زده شده", key: "whippedCream", color: "#fffdf9", label: "خامه", calories: 100, caffeine: 0 },
+        { name: "بستنی", key: "iceCream", color: "#fff8f0", label: "بستنی", calories: 200, caffeine: 0 },
+        { name: "سیروپ کارامل", key: "caramelSyrup", color: "#d4a76a", label: "کارامل", calories: 60, caffeine: 0 }
+    ];
+    // متغیرهای کلی
+    let currentSize = 'medium';
+    let currentTemp = 'hot';
+    let currentCupColor = 'white';
+    let savedRecipes = JSON.parse(localStorage.getItem('coffeeRecipes') || '[]');
+    // عناصر
     const buttons = document.querySelectorAll(".button-group .btn");
+    const sliders = document.querySelectorAll(".slider-thumb");
+    const valuePercents = document.querySelectorAll(".value-percent");
     const ingredientsList = document.querySelectorAll("#ingredientsList li");
-    const coffeeImage = document.querySelector("#coffeeImage");
-
-    // آپدیت قهوه بر اساس نوع
-    function updateCoffee(coffeeType) {
-        const recipe = coffeeRecipes[coffeeType];
-
-        const fields = [
-            "espresso", "steamedMilk", "milkFoam", "hotWater",
-            "chocolate", "whippedCream", "iceCream", "caramelSyrup"
-        ];
-
-        fields.forEach(key => {
-            const value = recipe[key];
-            document.getElementById(`${key}-value`).textContent = value + "%"; // فقط % اضافه شد
-            document.getElementById(`${key}-bar`).style.width = value + "%";
-        });
-
-        // آپدیت لیست ترکیبات
-        ingredientsList.forEach((li, index) => {
-            const value = recipe[fields[index]];
-            li.querySelector("span:last-child").textContent = value;
-            li.classList.toggle("d-none", value === 0);
-            li.classList.toggle("d-flex", value > 0);
-        });
-
-        // آپدیت تصویر
-        coffeeImage.src = coffeeImages[coffeeType] || "https://via.placeholder.com/256x256?text=Coffee";
+    const coffeeCup = document.querySelector("#coffeeCup");
+    const cupHandle = document.querySelector("#cupHandle");
+    const coffeeContainer = document.querySelector("#coffeeContainer");
+    const coffeeNameEl = document.querySelector("#coffeeName");
+    const coffeeInfoEl = document.querySelector("#coffeeInfo");
+    const clearBtn = document.getElementById("clearCup");
+    const saveBtn = document.getElementById("saveCombo");
+    const shareBtn = document.getElementById("shareCombo");
+    const personalName = document.getElementById("personalName");
+    const sizeButtons = document.querySelectorAll(".size-btn");
+    const tempButtons = document.querySelectorAll(".temp-btn");
+    const cupColorButtons = document.querySelectorAll(".cup-color-btn");
+    const caloriesValue = document.getElementById("caloriesValue");
+    const caffeineValue = document.getElementById("caffeineValue");
+    const tempValue = document.getElementById("tempValue");
+    const savedRecipesSection = document.getElementById("savedRecipes");
+    const savedRecipesList = document.getElementById("savedRecipesList");
+    const notification = document.getElementById("notification");
+    // ایجاد پارتیکل سیستم
+    function createParticles() {
+        const particlesContainer = document.getElementById('particles');
+        setInterval(() => {
+            if (document.querySelectorAll('.particle').length < 15) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                particlesContainer.appendChild(particle);
+                setTimeout(() => {
+                    particle.remove();
+                }, 17000);
+            }
+        }, 1000);
     }
-
-    // مدیریت کلیک روی دکمه‌ها
-    buttons.forEach(button => {
-        button.addEventListener("click", () => {
-            buttons.forEach(btn => btn.classList.remove("active"));
-            button.classList.add("active");
-            updateCoffee(button.textContent);
+    // محاسبه درصد واقعی
+    function calculatePercentages() {
+        let total = Array.from(sliders).reduce((sum, s) => sum + Number(s.value), 0);
+        if (total === 0) return Array(sliders.length).fill(0);
+        return Array.from(sliders).map(s => Math.round((Number(s.value) / total) * 100));
+    }
+    // محاسبه اطلاعات تغذیه‌ای
+    function calculateNutrition() {
+        let totalCalories = 0;
+        let totalCaffeine = 0;
+        const sizeMultiplier = currentSize === 'small' ? 0.7 : currentSize === 'large' ? 1.3 : 1;
+        sliders.forEach((slider, i) => {
+            const value = Number(slider.value);
+            if (value > 0) {
+                const ingredient = ingredientsConfig[i];
+                totalCalories += (ingredient.calories * value / 100) * sizeMultiplier;
+                totalCaffeine += (ingredient.caffeine * value / 100) * sizeMultiplier;
+            }
+        });
+        caloriesValue.textContent = Math.round(totalCalories);
+        caffeineValue.textContent = Math.round(totalCaffeine);
+        const tempMap = { hot: '75°C', warm: '45°C', cold: '5°C' };
+        tempValue.textContent = tempMap[currentTemp];
+    }
+    // به‌روزرسانی فنجان
+    function updateCoffeeCup(percents) {
+        coffeeCup.innerHTML = '';
+        const steamEl = document.createElement('div');
+        steamEl.className = 'steam';
+        steamEl.id = 'steam';
+        steamEl.innerHTML = `
+            <div class="steam-particle"></div>
+            <div class="steam-particle"></div>
+            <div class="steam-particle"></div>
+        `;
+        coffeeCup.appendChild(steamEl);
+        const iceEl = document.createElement('div');
+        iceEl.className = 'ice-effect';
+        iceEl.id = 'iceEffect';
+        coffeeCup.appendChild(iceEl);
+        if (currentTemp === 'hot') {
+            steamEl.classList.add('show');
+            iceEl.classList.remove('show');
+        } else if (currentTemp === 'cold') {
+            steamEl.classList.remove('show');
+            iceEl.classList.add('show');
+        } else {
+            steamEl.classList.remove('show');
+            iceEl.classList.remove('show');
+        }
+        let currentBottom = 0;
+        const topLayers = ["milkFoam", "whippedCream", "iceCream"];
+        const layers = ingredientsConfig
+            .map((config, i) => ({
+                config,
+                value: Number(sliders[i].value),
+                percent: percents[i]
+            }))
+            .filter(layer => layer.value > 0)
+            .sort((a, b) => {
+                const aTop = topLayers.includes(a.config.key);
+                const bTop = topLayers.includes(b.config.key);
+                return aTop === bTop ? 0 : aTop ? 1 : -1;
+            });
+        layers.forEach(layer => {
+            const layerEl = document.createElement('div');
+            layerEl.classList.add('coffee-layer');
+            layerEl.style.height = `${layer.percent}%`;
+            layerEl.style.bottom = `${currentBottom}%`;
+            layerEl.style.backgroundColor = layer.config.color;
+            layerEl.title = `${layer.config.label}: ${layer.percent}%`;
+            coffeeCup.appendChild(layerEl);
+            currentBottom += layer.percent;
+        });
+    }
+    // به‌روزرسانی UI
+    function updateUI() {
+        const percents = calculatePercentages();
+        valuePercents.forEach((el, i) => {
+            el.textContent = `${percents[i]}%`;
+        });
+        ingredientsList.forEach((li, i) => {
+            const span = li.querySelector("span:last-child");
+            span.textContent = `${percents[i]}%`;
+            if (percents[i] > 0) {
+                li.classList.remove("d-none");
+                li.classList.add("d-flex");
+            } else {
+                li.classList.remove("d-flex");
+                li.classList.add("d-none");
+            }
+        });
+        updateCoffeeCup(percents);
+        calculateNutrition();
+    }
+    // تنظیم ترکیب معروف
+    function setCoffee(coffeeType) {
+        if (!coffeeRecipes[coffeeType]) return;
+        const recipe = coffeeRecipes[coffeeType];
+        sliders.forEach((slider, index) => {
+            const key = ingredientsConfig[index].key;
+            slider.value = recipe[key] || 0;
+        });
+        updateUI();
+        coffeeNameEl.textContent = coffeeType;
+        coffeeInfoEl.textContent = coffeeInfoText[coffeeType] || "";
+        buttons.forEach(btn => btn.classList.remove("active"));
+        const activeBtn = Array.from(buttons).find(b => b.textContent === coffeeType);
+        if (activeBtn) activeBtn.classList.add("active");
+        personalName.classList.add("d-none");
+    }
+    // تنظیم سایز فنجان
+    function setCupSize(size) {
+        currentSize = size;
+        coffeeContainer.className = `coffee-cup-container ${size}`;
+        sizeButtons.forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`[data-size="${size}"]`).classList.add('active');
+        calculateNutrition();
+    }
+    // تنظیم دمای نوشیدنی
+    function setTemperature(temp) {
+        currentTemp = temp;
+        tempButtons.forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`[data-temp="${temp}"]`).classList.add('active');
+        updateUI();
+    }
+    // تنظیم رنگ فنجان
+    function setCupColor(color) {
+        currentCupColor = color;
+        coffeeCup.className = `coffee-cup ${color}`;
+        cupHandle.className = `handle ${color}`;
+        cupColorButtons.forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`[data-color="${color}"]`).classList.add('active');
+    }
+    // نمایش اعلان
+    function showNotification(message) {
+        notification.textContent = message;
+        notification.classList.add('show');
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+    // ذخیره ترکیب
+    function saveRecipe() {
+        const recipe = {
+            id: Date.now(),
+            name: coffeeNameEl.textContent || 'ترکیب جدید',
+            ingredients: Array.from(sliders).map(s => parseInt(s.value)),
+            size: currentSize,
+            temp: currentTemp,
+            cupColor: currentCupColor,
+            date: new Date().toLocaleDateString('fa-IR')
+        };
+        savedRecipes.push(recipe);
+        localStorage.setItem('coffeeRecipes', JSON.stringify(savedRecipes));
+        displaySavedRecipes();
+        showNotification('ترکیب با موفقیت ذخیره شد!');
+    }
+    // نمایش ترکیبات ذخیره شده
+    function displaySavedRecipes() {
+        if (savedRecipes.length === 0) {
+            savedRecipesSection.classList.add('d-none');
+            return;
+        }
+        savedRecipesSection.classList.remove('d-none');
+        savedRecipesList.innerHTML = '';
+        savedRecipes.forEach(recipe => {
+            const recipeEl = document.createElement('div');
+            recipeEl.className = 'saved-recipe';
+            recipeEl.innerHTML = `
+                <div>
+                    <strong>${recipe.name}</strong>
+                    <small class="d-block opacity-75">${recipe.date}</small>
+                </div>
+                <span class="delete-recipe" data-id="${recipe.id}">🗑️</span>
+            `;
+            recipeEl.addEventListener('click', () => {
+                sliders.forEach((slider, i) => {
+                    slider.value = recipe.ingredients[i];
+                });
+                currentSize = recipe.size;
+                currentTemp = recipe.temp;
+                currentCupColor = recipe.cupColor;
+                setCupSize(currentSize);
+                setTemperature(currentTemp);
+                setCupColor(currentCupColor);
+                coffeeNameEl.textContent = recipe.name;
+                personalName.classList.remove('d-none');
+                personalName.textContent = recipe.name;
+                updateUI();
+                showNotification('ترکیب بارگذاری شد');
+            });
+            recipeEl.querySelector('.delete-recipe').addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteRecipe(recipe.id);
+            });
+            savedRecipesList.appendChild(recipeEl);
+        });
+    }
+    // حذف ترکیب
+    function deleteRecipe(id) {
+        savedRecipes = savedRecipes.filter(r => r.id !== id);
+        localStorage.setItem('coffeeRecipes', JSON.stringify(savedRecipes));
+        displaySavedRecipes();
+        showNotification('ترکیب حذف شد');
+    }
+    // اشتراک‌گذاری ترکیب
+    function shareRecipe() {
+        const name = coffeeNameEl.textContent;
+        const ingredients = [];
+        sliders.forEach((slider, i) => {
+            const value = slider.value;
+            if (value > 0) {
+                ingredients.push(`${ingredientsConfig[i].name}: ${value}`);
+            }
+        });
+        const text = `ترکیب قهوه من: ${name}\nمواد: ${ingredients.join(', ')}\nسایز: ${currentSize}, دما: ${currentTemp}`;
+        if (navigator.share) {
+            navigator.share({
+                title: 'ترکیب قهوه من',
+                text: text
+            }).catch(() => {
+                navigator.clipboard.writeText(text).then(() => {
+                    showNotification('لینک کپی شد!');
+                });
+            });
+        } else {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('متن کپی شد!');
+            });
+        }
+    }
+    // اولیه‌سازی
+    createParticles();
+    updateUI();
+    displaySavedRecipes();
+    // رویداد اسلایدرها
+    sliders.forEach(slider => {
+        slider.addEventListener('input', () => {
+            const total = Array.from(sliders).reduce((sum, s) => sum + Number(s.value), 0);
+            if (total > 120) {
+                const factor = 120 / total;
+                sliders.forEach(s => s.value = Math.round(s.value * factor));
+            }
+            updateUI();
         });
     });
-
-    // تنظیم پیش‌فرض: لاته
-    updateCoffee("لاته");
+    // دکمه‌های معروف
+    buttons.forEach(btn => {
+        btn.addEventListener("click", () => setCoffee(btn.textContent));
+    });
+    // تمیز کردن فنجان
+    clearBtn.addEventListener("click", () => {
+        sliders.forEach(s => s.value = 0);
+        coffeeNameEl.textContent = "سفارش شما";
+        coffeeInfoEl.textContent = "مواد خود را انتخاب کنید";
+        personalName.classList.add("d-none");
+        updateUI();
+    });
+    // ذخیره ترکیب
+    saveBtn.addEventListener("click", saveRecipe);
+    // اشتراک‌گذاری
+    shareBtn.addEventListener("click", shareRecipe);
+    // کنترل‌ها
+    sizeButtons.forEach(btn => {
+        btn.addEventListener('click', () => setCupSize(btn.dataset.size));
+    });
+    tempButtons.forEach(btn => {
+        btn.addEventListener('click', () => setTemperature(btn.dataset.temp));
+    });
+    cupColorButtons.forEach(btn => {
+        btn.addEventListener('click', () => setCupColor(btn.dataset.color));
+    });
 </script>
 </body>
 </html>
