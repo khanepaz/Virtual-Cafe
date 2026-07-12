@@ -4,6 +4,14 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>کافه مجازی</title>
+    <!-- لینک به manifest -->
+<link rel="manifest" href="manifest.json">
+
+<!-- متاتگ‌های PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="کافه مجازی">
+<meta name="theme-color" content="#daa520">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
@@ -1213,6 +1221,60 @@
     cupColorButtons.forEach(btn => {
         btn.addEventListener('click', () => setCupColor(btn.dataset.color));
     });
+</script>
+<script>
+    // ثبت سرویس ورکر برای PWA
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(registration => {
+                    console.log('ServiceWorker ثبت شد:', registration);
+                })
+                .catch(error => {
+                    console.log('خطا در ثبت ServiceWorker:', error);
+                });
+        });
+    }
+
+    // نمایش دکمه نصب روی اندروید
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        showInstallButton();
+    });
+
+    function showInstallButton() {
+        // بررسی اینکه دکمه قبلاً ساخته نشده باشه
+        if (document.getElementById('pwaInstallBtn')) return;
+        
+        const installBtn = document.createElement('button');
+        installBtn.id = 'pwaInstallBtn';
+        installBtn.innerHTML = '<i class="fas fa-download"></i> نصب اپلیکیشن';
+        installBtn.className = 'btn btn-success position-fixed bottom-0 start-50 translate-middle-x mb-3';
+        installBtn.style.zIndex = '9999';
+        installBtn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+        installBtn.style.padding = '12px 24px';
+        installBtn.style.borderRadius = '50px';
+        installBtn.style.fontWeight = 'bold';
+        
+        installBtn.onclick = async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const result = await deferredPrompt.userChoice;
+                if (result.outcome === 'accepted') {
+                    console.log('کاربر اپلیکیشن رو نصب کرد');
+                    installBtn.remove();
+                }
+                deferredPrompt = null;
+            }
+        };
+        
+        // فقط اگر هنوز نصب نشده باشه نشون بده
+        if (!window.matchMedia('(display-mode: standalone)').matches) {
+            document.body.appendChild(installBtn);
+        }
+    }
 </script>
 </body>
 </html>
