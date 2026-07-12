@@ -1,9 +1,12 @@
-const CACHE_NAME = 'Virtual Cafe';
+const CACHE_NAME = 'cafe-virtual-v1';
 const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
-  'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css'
+  'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
+  'https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap',
+  'https://fonts.googleapis.com/icon?family=Material+Icons',
+  'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'
 ];
 
 // نصب سرویس ورکر
@@ -11,6 +14,7 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
+        console.log('Cache opened');
         return cache.addAll(urlsToCache);
       })
   );
@@ -21,7 +25,22 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        return response || fetch(event.request);
+        if (response) {
+          return response;
+        }
+        return fetch(event.request).then(
+          response => {
+            if(!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME)
+              .then(cache => {
+                cache.put(event.request, responseToCache);
+              });
+            return response;
+          }
+        );
       })
   );
 });
