@@ -1,8 +1,0 @@
-[{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "io.github.khanepaz.twa",
-        "sha256_cert_fingerprints": ["A8:5F:21:99:74:8D:3D:AA:7C:A1:9D:73:DD:02:13:EC:94:88:AE:01:D6:09:31:D2:C0:9E:CC:D8:34:57:A9:08"]
-      }
-    }]
